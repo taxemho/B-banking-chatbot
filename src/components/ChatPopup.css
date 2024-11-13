@@ -1,0 +1,201 @@
+/* Chat popup icon on the bottom right */
+.chat-logo {
+  width: 50px;
+  cursor: pointer;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  transition: transform 0.3s ease;
+}
+
+.chat-logo:hover {
+  transform: scale(1.1);
+}
+
+/* Main chat popup container */
+.chat-popup {
+  width: 350px;
+  max-height: 60%;
+  height: 100%;
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+/* Chat header with close button */
+.chat-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  background-color: #35383b;
+  color: white;
+  font-size: 18px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+}
+
+/* Main chat messages section with vertical-only scrolling */
+.chat-messages {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+/* Container for each message to align icon and bubble separately */
+.message-container {
+  display: flex;
+  align-items: flex-start;
+  margin: 8px 0;
+}
+
+.message-container.user {
+  justify-content: flex-end;
+}
+
+/* Circular icon for bot and user messages */
+.message-logo {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 10px;
+}
+
+.message-logo img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Message bubble styling */
+.message-bubble {
+  max-width: 240px;
+  padding: 10px 15px;
+  border-radius: 20px;
+  word-wrap: break-word;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.message-bubble.bot {
+  background-color: #f0f0f0;
+  border-top-left-radius: 0;
+}
+
+.message-bubble.user {
+  background-color: #007bff;
+  color: white;
+  border-top-right-radius: 0;
+}
+
+/* Main menu and sub-options styling */
+.menu-container,
+.sub-options {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.menu-btn,
+.sub-option-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 5px;
+  font-size: 14px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  width: 100%;
+}
+
+.menu-btn:hover,
+.sub-option-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Input container for user input requests (e.g., msisdn or trid) */
+.input-container {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-field {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+
+.submit-btn {
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+
+
+/* Restart chat button styling */
+.restart-btn {
+  padding: 10px;
+  margin: 15px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 90%;
+  transition: background-color 0.3s ease;
+  display: none; /* Initially hidden */
+}
+
+.restart-btn.visible {
+  display: block; /* Show only after response */
+}
+
+
+
+.small-btn {
+  font-size: 12px;
+}
+.input-section {
+  display: flex;
+}
+
+.main-menu-btn {
+  width: 30%;
+  margin: 0px 50px 0 120px;
+  border-radius: 15px;
+  border-color: #007bff;
+}
