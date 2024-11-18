@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./ChatPopup.css";
-import logo from "../assets/imglogo.png"; // Chat logo
 import botLogo from "../assets/botLogo.png"; // Bot logo
 import userLogo from "../assets/userLogo.png"; // User logo
-import closeIcon from "../assets/closeLogo.png";
+import logoBSNL from "../assets/logoBSNLbot.png.png";
+import restart from "../assets/restart.png";
+import expand from "../assets/expand.png";
+import close from "../assets/close.png";
 
 const ChatPopup = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [mainMenu, setMainMenu] = useState([]);
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [showMainMenuButton, setShowMainMenuButton] = useState(true);
-  
+  const [currentServiceKey, setCurrentServiceKey] = useState("");
 
   const chatEndRef = useRef(null);
 
@@ -25,7 +28,10 @@ const ChatPopup = () => {
       resetChat();
     }
   };
-
+// Toggle full-screen mode
+  const toggleFullScreen = () => {
+    setIsFullScreen((prev) => !prev);
+  };
   // Fetch main menu options from API
   const loadMainMenu = async () => {
     try {
@@ -51,11 +57,30 @@ const ChatPopup = () => {
       ...prev,
       { sender: 'user', text: `You selected: ${menuItem.name}` },
     ]);
-    setActiveSubMenu(menuItem.subMenu || null);
+
+    if (!menuItem.subMenu) {
+      // Handle Dealer Status Check (or other menu items without suboptions)
+      setMainMenu([]); // Hide main menu immediately
+      setActiveSubMenu(null);
+      setCurrentServiceKey(menuItem.serviceKey);
+
+      let promptMessage = '';
+      if (menuItem.serviceKey === 'DLY_STUS_CH') {
+        promptMessage = 'Please enter your mobile number for dealer status check.';
+      }
+
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: promptMessage },
+      ]);
+      setShowMainMenuButton(false); // Hide main menu button
+    } else {
+      setActiveSubMenu(menuItem.subMenu || null);
+    }
   };
   // Handle user input submission
-const handleInputSubmit = async () => {
-  if (!inputValue) return;
+  const handleInputSubmit = async () => {
+    if (!inputValue) return;
 
   // Add user message to chat
   setChatMessages((prev) => [...prev, { sender: 'user', text: inputValue }]);
@@ -102,16 +127,18 @@ const handleInputSubmit = async () => {
   try {
     // Make API call to get details
     const response = await axios.post('http://172.30.10.200:4455/api-chatbot/get-details', requestBody);
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: 'bot', text: response.data.template || 'No response received' }
-    ]);
+    const botResponse = response.data.template || "No response received";
+    setChatMessages((prev) => [...prev, { sender: "bot", text: botResponse }]);
+    if (botResponse === "No response received") {
+      setShowMainMenuButton(true);
+    }
   } catch (error) {
     console.error('Error fetching details:', error);
     setChatMessages((prev) => [
       ...prev,
       { sender: 'bot', text: 'Error fetching details. Please try again.' }
     ]);
+    setShowMainMenuButton(true);
   }
 
   // Reset input stage and values after request
@@ -121,32 +148,26 @@ const handleInputSubmit = async () => {
 
   // Handle sub-option selection (e.g., Prepaid Wallet or Postpaid Wallet)
   const handleSubOptionClick = async (subOption) => {
-    let promptMessage = '';
-    if (subOption.serviceKey.includes('BAL_ENQ')) {
-      promptMessage = 'Please enter your mobile number for balance enquiry.';
-    } else if (subOption.serviceKey.includes('TR_STUS')) {
-      promptMessage = 'Please enter the transaction ID for transaction status.';
-    } else if (subOption.serviceKey === 'DLY_STUS_CH') {
-      promptMessage = 'Please enter your mobile number for dealer status check.';
-    }
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: 'bot', text: promptMessage }
-    ]);
+    const promptMessage =
+      subOption.serviceKey.includes("BAL_ENQ") ? "Please enter your mobile number for balance enquiry." :
+      subOption.serviceKey.includes("TR_STUS") ? "Please enter the transaction ID for transaction status." :
+      subOption.serviceKey === "DLY_STUS_CH" ? "Please enter your mobile number for dealer status check." :
+      "";
+
+    setChatMessages((prev) => [...prev, { sender: "bot", text: promptMessage }]);
     setMainMenu([]);
-    setActiveSubMenu(null); // Hide sub-options after selection
-    setShowMainMenuButton(false); // Ensure main menu button is hidden
-    setInputValue(''); // Clear input field for user prompt
+    setActiveSubMenu(null);
+    setShowMainMenuButton(false);
+    setInputValue("");
     setCurrentServiceKey(subOption.serviceKey);
   };
-  const [currentServiceKey, setCurrentServiceKey] = useState('');
-  // Reset chat to the initial state
+
   const resetChat = () => {
-    setIsOpen(false);
     setChatMessages([]);
     setInputValue('');
     setMainMenu([]);
     setActiveSubMenu(null);
+    setCurrentServiceKey('');
     setShowMainMenuButton(true);
   };
 
@@ -158,22 +179,37 @@ const handleInputSubmit = async () => {
   return (
     <>
       <img 
-        src={isOpen ? closeIcon : logo} // Replace `closeIcon` with your new icon
+        src={logoBSNL} // Replace `closeIcon` with your new icon
         alt="Chat Icon" 
         className="chat-logo" 
         onClick={togglePopup} 
       />
       {isOpen && (
-        <div className="chat-popup">
+        <div className={`chat-popup ${isFullScreen ? 'fullscreen' : ''}`}>
           <div className="chat-header">
-            <h3>bsnlBOT</h3>
+            <h3>Virtual Assistant</h3>
+            <div className="header-btns">
+              <img
+                src={expand}
+                alt="full screen"
+                className="fullscreen-btn"
+                onClick={toggleFullScreen}
+              />
+              <img
+                src={restart} // Reset button icon
+                alt="Reset"
+                className="reset-btn"
+                onClick={resetChat}
+              />
+              <img src={close} alt="closebot" onClick={() => setIsOpen(false)} className="header-btn"/>
+          </div>
           </div>
           <div className="chat-messages">
             {chatMessages.map((message, index) => (
               <div key={index} className={`message-container ${message.sender}`}>
                 {message.sender === 'bot' && (
                   <div className="message-logo">
-                    <img src={botLogo} alt="Bot Icon" className="icon" />
+                    <img src={botLogo} alt="Bot Icon" className="icon-bot" />
                   </div>
                 )}
                 <div className={`message-bubble ${message.sender}`}>
@@ -181,7 +217,7 @@ const handleInputSubmit = async () => {
                 </div>
                 {message.sender === 'user' && (
                   <div className="message-logo">
-                    <img src={userLogo} alt="User Icon" className="icon" />
+                    <img src={userLogo} alt="User Icon" className="icon-user" />
                   </div>
                 )}
               </div>
@@ -224,7 +260,7 @@ const handleInputSubmit = async () => {
           <div className="input-section">
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder="Type Hi to start"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleInputSubmit()}
